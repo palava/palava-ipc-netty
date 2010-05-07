@@ -16,10 +16,15 @@
 
 package de.cosmocode.palava.ipc.netty;
 
-import java.lang.annotation.Annotation;
+import java.net.InetSocketAddress;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+
+import org.jboss.netty.channel.ChannelPipelineFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Binder;
+import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.name.Names;
 
@@ -39,44 +44,70 @@ public final class NettyServiceModule implements Module {
         binder.bind(NettyService.class).asEagerSingleton();
     }
     
+    /**
+     * Creates a rebinding module rebind netty configuration using the specified
+     * name as a prefix.
+     * 
+     * @since 1.0
+     * @param name the prefix/name
+     * @return a {@link RebindModule}
+     * @throws NullPointerException if name is null
+     */
     public static RebindModule named(String name) {
         Preconditions.checkNotNull(name, "Name");
-        return annotatedWith(Names.named(name), name);
+        return new NamedModule(name);
     }
     
-    public static RebindModule annotatedWith(final Annotation annotation, final String name) {
-        return null;
+    /**
+     * Named rebing module for netty.
+     *
+     * @since 1.0
+     * @author Willi Schoenborn
+     */
+    private static final class NamedModule extends AbstractRebindingModule {
+
+        private final String name;
+        
+        public NamedModule(String name) {
+            this.name = name;
+        }
+
+        @Override
+        protected void configuration() {
+            bind(String.class).annotatedWith(Names.named(NettyServiceConfig.NAME)).toInstance(name);
+
+            bind(ChannelPipelineFactory.class).to(
+                Key.get(ChannelPipelineFactory.class, Names.named(name + NettyServiceConfig.PIPELINE_FACTORY)));
+            
+            bind(InetSocketAddress.class).annotatedWith(Names.named(NettyServiceConfig.ADDRESS)).to(
+                Key.get(InetSocketAddress.class, Names.named(name + NettyServiceConfig.ADDRESS)));
+        }
+        
+        @Override
+        protected void optionals() {
+            bind(String.class).annotatedWith(Names.named(NettyServiceConfig.GROUP_NAME)).to(
+                Key.get(String.class, Names.named(name + NettyServiceConfig.GROUP_NAME)));
+            
+            bind(Properties.class).annotatedWith(Names.named(NettyServiceConfig.OPTIONS)).to(
+                Key.get(Properties.class, Names.named(name + NettyServiceConfig.OPTIONS)));
+            
+            bind(long.class).annotatedWith(Names.named(NettyServiceConfig.SHUTDOWN_TIMEOUT)).to(
+                Key.get(long.class, Names.named(name + NettyServiceConfig.SHUTDOWN_TIMEOUT)));
+            
+            bind(TimeUnit.class).annotatedWith(Names.named(NettyServiceConfig.SHUTDOWN_TIMEOUT_UNIT)).to(
+                Key.get(TimeUnit.class, Names.named(name + NettyServiceConfig.SHUTDOWN_TIMEOUT_UNIT)));
+        }
+        
+        @Override
+        protected void bindings() {
+            install(new NettyServiceModule());
+        }
+        
+        @Override
+        protected void expose() {
+            // nothing to expose
+        }
+        
     }
     
-    public static RebindModule annotatedWith(final Class<? extends Annotation> annotation, final String name) {
-        return new AbstractRebindingModule() {
-            
-            @Override
-            protected void configuration() {
-                binder().bind(String.class).annotatedWith(Names.named(NettyServiceConfig.NAME)).toInstance(name);
-
-                
-            }
-            
-            @Override
-            protected void optionals() {
-                // TODO Auto-generated method stub
-                
-            }
-            
-            @Override
-            protected void bindings() {
-                // TODO Auto-generated method stub
-                
-            }
-            
-            @Override
-            protected void expose() {
-                // TODO Auto-generated method stub
-                
-            }
-            
-        };
-    }
-
 }

@@ -19,8 +19,6 @@ package de.cosmocode.palava.ipc.netty;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.Channels;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
@@ -32,8 +30,6 @@ import com.google.inject.Inject;
  */
 public final class NettyTestChannelPipelineFactory implements ChannelPipelineFactory {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NettyTestChannelPipelineFactory.class);
-    
     private final EchoHandler handler;
     
     @Inject
@@ -43,12 +39,7 @@ public final class NettyTestChannelPipelineFactory implements ChannelPipelineFac
     
     @Override
     public ChannelPipeline getPipeline() throws Exception {
-        final ChannelPipeline pipeline = Channels.pipeline();
-    
-        LOG.info("Adding handler {}", handler);
-        pipeline.addLast(handler.toString(), handler);
-        
-        return pipeline;
+        return Channels.pipeline(handler);
     }
 
 }

@@ -28,6 +28,8 @@ final class NettyServiceConfig {
     
     public static final String NAME = PREFIX + "name";
     
+    public static final String PIPELINE_FACTORY = PREFIX + "pipelineFactory";
+    
     public static final String ADDRESS = PREFIX + "address";
     
     public static final String OPTIONS = PREFIX + "options";

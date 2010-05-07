@@ -48,6 +48,7 @@ import de.cosmocode.palava.core.event.PreFrameworkStop;
 import de.cosmocode.palava.core.lifecycle.Disposable;
 import de.cosmocode.palava.core.lifecycle.Initializable;
 import de.cosmocode.palava.core.lifecycle.LifecycleException;
+import de.cosmocode.palava.jmx.MBeanService;
 
 /**
  * A service which handles a client/server protocol on a specific
@@ -56,40 +57,62 @@ import de.cosmocode.palava.core.lifecycle.LifecycleException;
  * @since 1.0
  * @author Willi Schoenborn
  */
-final class NettyService implements Initializable, PostFrameworkStart, PreFrameworkStop, Disposable {
+final class NettyService implements NettyServiceMBean, 
+    Initializable, PostFrameworkStart, PreFrameworkStop, Disposable {
 
     private static final Logger LOG = LoggerFactory.getLogger(NettyService.class);
     
+    private String name = "netty";
+    
     private final Registry registry;
+    
+    private final MBeanService mBeanService;
     
     private final ChannelFactory factory;
     
     private final ChannelPipelineFactory pipelineFactory;
     
+    private ChannelGroup group = new DefaultChannelGroup();
+    
     private final InetSocketAddress address;
+    
+    private Map<Object, Object> options = Maps.newHashMap();
     
     private long shutdownTimeout = 30;
     
     private TimeUnit shutdownTimeoutUnit = TimeUnit.SECONDS;
     
-    private Map<Object, Object> options = Maps.newHashMap();
-    
-    private ChannelGroup group = new DefaultChannelGroup();
-    
     @Inject
     public NettyService(
         Registry registry,
+        MBeanService mBeanService,
         @Boss ExecutorService boss,
         @Worker ExecutorService worker,
         ChannelPipelineFactory pipelineFactory,
         @Named(NettyServiceConfig.ADDRESS) InetSocketAddress address) {
         
         this.registry = Preconditions.checkNotNull(registry, "Registry");
+        this.mBeanService = Preconditions.checkNotNull(mBeanService, "MBeanService");
         Preconditions.checkNotNull(boss, "Boss");
         Preconditions.checkNotNull(worker, "Worker");
         this.factory = new NioServerSocketChannelFactory(boss, worker);
         this.pipelineFactory = Preconditions.checkNotNull(pipelineFactory, "PipelineFactory");
         this.address = Preconditions.checkNotNull(address, "Address");
+    }
+    
+    @Inject(optional = true)
+    void setName(@Named(NettyServiceConfig.NAME) String name) {
+        this.name = Preconditions.checkNotNull(name, "Name");
+    }
+    
+    @Inject(optional = true)
+    void setGroupName(@Named(NettyServiceConfig.GROUP_NAME) String groupName) {
+        this.group = new DefaultChannelGroup(Preconditions.checkNotNull(groupName, "GroupName"));
+    }
+    
+    @Inject(optional = true)
+    void setOptions(@Named(NettyServiceConfig.OPTIONS) Properties options) {
+        this.options = Preconditions.checkNotNull(options, "Options");
     }
     
     @Inject(optional = true)
@@ -102,20 +125,11 @@ final class NettyService implements Initializable, PostFrameworkStart, PreFramew
         this.shutdownTimeoutUnit = Preconditions.checkNotNull(shutdownTimeoutUnit, "ShutdownTimeoutUnit");
     }
     
-    @Inject(optional = true)
-    void setOptions(@Named(NettyServiceConfig.OPTIONS) Properties options) {
-        this.options = Preconditions.checkNotNull(options, "Options");
-    }
-    
-    @Inject(optional = true)
-    void setGroupName(@Named(NettyServiceConfig.GROUP_NAME) String name) {
-        this.group = new DefaultChannelGroup(Preconditions.checkNotNull(name, "Name"));
-    }
-    
     @Override
     public void initialize() throws LifecycleException {
         registry.register(PostFrameworkStart.class, this);
         registry.register(PreFrameworkStop.class, this);
+        mBeanService.register(this, "name", name);
     }
     
     @Override
@@ -157,6 +171,11 @@ final class NettyService implements Initializable, PostFrameworkStart, PreFramew
     }
     
     @Override
+    public int getOpenConnections() {
+        return group.size();
+    }
+    
+    @Override
     public void eventPreFrameworkStop() {
         LOG.info("Waiting {} {} for connections to close", shutdownTimeout, shutdownTimeoutUnit.name().toLowerCase());
         group.close().awaitUninterruptibly(shutdownTimeout, shutdownTimeoutUnit);
@@ -164,8 +183,17 @@ final class NettyService implements Initializable, PostFrameworkStart, PreFramew
     
     @Override
     public void dispose() throws LifecycleException {
-        factory.releaseExternalResources();
-        registry.remove(this);
+        try {
+            mBeanService.unregister(this, "name", name);
+        } finally {
+            factory.releaseExternalResources();
+            registry.remove(this);
+        }
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("%s [%s]", NettyService.class.getSimpleName(), name);
     }
 
 }
