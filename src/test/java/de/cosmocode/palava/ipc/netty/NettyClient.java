@@ -20,6 +20,7 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.jboss.netty.bootstrap.ClientBootstrap;
 import org.jboss.netty.channel.Channel;
@@ -119,7 +120,7 @@ public final class NettyClient extends AbstractClient {
             future.awaitUninterruptibly();
             
             try {
-                latch.await();
+                latch.await(30, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e);
             }
