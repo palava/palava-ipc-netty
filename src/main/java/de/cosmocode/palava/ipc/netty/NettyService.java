@@ -68,6 +68,8 @@ final class NettyService implements NettyServiceMBean,
     
     private final MBeanService mBeanService;
     
+    private int workerCount = Runtime.getRuntime().availableProcessors() * 2;
+    
     private final ChannelFactory factory;
     
     private final ChannelPipelineFactory pipelineFactory;
@@ -95,7 +97,8 @@ final class NettyService implements NettyServiceMBean,
         this.mBeanService = Preconditions.checkNotNull(mBeanService, "MBeanService");
         Preconditions.checkNotNull(boss, "Boss");
         Preconditions.checkNotNull(worker, "Worker");
-        this.factory = new NioServerSocketChannelFactory(boss, worker);
+        LOG.trace("Using worker count {}", workerCount);
+        this.factory = new NioServerSocketChannelFactory(boss, worker, workerCount);
         this.pipelineFactory = Preconditions.checkNotNull(pipelineFactory, "PipelineFactory");
         this.address = Preconditions.checkNotNull(address, "Address");
     }
@@ -103,6 +106,11 @@ final class NettyService implements NettyServiceMBean,
     @Inject(optional = true)
     void setName(@Named(NettyServiceConfig.NAME) String name) {
         this.name = Preconditions.checkNotNull(name, "Name");
+    }
+    
+    @Inject(optional = true)
+    void setWorkerCount(@Named(NettyServiceConfig.WORKER_COUNT) int workerCount) {
+        this.workerCount = workerCount;
     }
     
     @Inject(optional = true)

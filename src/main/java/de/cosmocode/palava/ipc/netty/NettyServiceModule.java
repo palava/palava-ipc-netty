@@ -85,6 +85,9 @@ public final class NettyServiceModule implements Module {
         
         @Override
         protected void optionals() {
+            bind(int.class).annotatedWith(Names.named(NettyServiceConfig.WORKER_COUNT)).to(
+                Key.get(int.class, Names.named(name + NettyServiceConfig.WORKER_COUNT)));
+            
             bind(String.class).annotatedWith(Names.named(NettyServiceConfig.GROUP_NAME)).to(
                 Key.get(String.class, Names.named(name + NettyServiceConfig.GROUP_NAME)));
             

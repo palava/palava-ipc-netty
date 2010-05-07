@@ -16,8 +16,7 @@
 
 package de.cosmocode.palava.ipc.netty;
 
-import java.util.concurrent.TimeUnit;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 import de.cosmocode.palava.core.Framework;
@@ -33,17 +32,22 @@ public final class NettyServiceTest {
 
     /**
      * Tests booting {@link NettyService}.
-     * 
-     * @throws InterruptedException should not happen
      */
     @Test
-    public void boot() throws InterruptedException {
+    public void boot() {
         final Framework framework = Palava.newFramework();
         framework.start();
+
+        final Client client = new NettyClient();
+        final Connection connection = client.connect("localhost", 8081);
+        
         
         try {
-            Thread.sleep(TimeUnit.SECONDS.toMillis(30));
+            Assert.assertEquals("test", connection.send("test"));
+            Assert.assertEquals(getClass().toString(), connection.send(getClass().toString()));
         } finally {
+            connection.disconnect();
+            client.shutdown();
             framework.stop();
         }
     }
