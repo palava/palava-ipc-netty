@@ -23,15 +23,15 @@ import de.cosmocode.palava.core.Framework;
 import de.cosmocode.palava.core.Palava;
 
 /**
- * Tests {@link NettyService}.
+ * Tests {@link Netty}.
  *
  * @since 1.0
  * @author Willi Schoenborn
  */
-public final class NettyServiceTest {
+public final class NettyTest {
 
     /**
-     * Tests booting {@link NettyService}.
+     * Tests booting {@link Netty}.
      */
     @Test
     public void boot() {

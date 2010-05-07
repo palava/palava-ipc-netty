@@ -22,7 +22,7 @@ package de.cosmocode.palava.ipc.netty;
  * @since 1.0
  * @author Willi Schoenborn
  */
-final class NettyServiceConfig {
+final class NettyConfig {
 
     public static final String PREFIX = "netty.";
     
@@ -42,7 +42,7 @@ final class NettyServiceConfig {
     
     public static final String SHUTDOWN_TIMEOUT_UNIT = PREFIX + "shutdownTimeoutUnit";
     
-    private NettyServiceConfig() {
+    private NettyConfig() {
         
     }
 

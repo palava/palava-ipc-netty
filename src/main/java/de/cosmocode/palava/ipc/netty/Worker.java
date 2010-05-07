@@ -35,7 +35,7 @@ import com.google.inject.BindingAnnotation;
     ElementType.PARAMETER
 })
 @BindingAnnotation
-@interface Worker {
+public @interface Worker {
 
     String NAME = "worker";
     

@@ -42,9 +42,9 @@ public final class EchoHandler extends SimpleChannelHandler {
     }
     
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-        final Channel channel = ctx.getChannel();
-        LOG.error("Exception in channel " + channel, e);
+    public void exceptionCaught(ChannelHandlerContext context, ExceptionEvent event) throws Exception {
+        final Channel channel = event.getChannel();
+        LOG.error("Exception in channel " + channel, event.getCause());
         channel.close();
     }
     
