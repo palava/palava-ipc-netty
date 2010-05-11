@@ -90,7 +90,7 @@ public final class NettyClient extends AbstractClient {
     }
     
     @Override
-    public Connection connect(InetSocketAddress address) {
+    public ClientConnection connect(InetSocketAddress address) {
         Preconditions.checkNotNull(address, "Address");
         final ChannelFuture future = bootstrap.connect(address);
         final Channel channel = future.awaitUninterruptibly().getChannel();
@@ -98,12 +98,12 @@ public final class NettyClient extends AbstractClient {
     }
     
     /**
-     * Internal implementation of the {@link Connection} interface.
+     * Internal implementation of the {@link ClientConnection} interface.
      *
      * @since 
      * @author Willi Schoenborn
      */
-    private final class InternalConnection implements Connection {
+    private final class InternalConnection implements ClientConnection {
      
         private final Channel channel;
         

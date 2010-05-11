@@ -39,7 +39,7 @@ public final class NettyTest {
         framework.start();
 
         final Client client = new NettyClient();
-        final Connection connection = client.connect("localhost", 8081);
+        final ClientConnection connection = client.connect("localhost", 8081);
         
         
         try {

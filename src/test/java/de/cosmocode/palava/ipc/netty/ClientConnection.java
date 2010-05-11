@@ -22,7 +22,7 @@ package de.cosmocode.palava.ipc.netty;
  * @since 1.0
  * @author Willi Schoenborn
  */
-public interface Connection {
+public interface ClientConnection {
     
     /**
      * Sends the specified string and notifies the given callback asynchronously.

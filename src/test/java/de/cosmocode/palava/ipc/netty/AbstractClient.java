@@ -29,7 +29,7 @@ import com.google.common.base.Preconditions;
 public abstract class AbstractClient implements Client {
 
     @Override
-    public Connection connect(String host, int port) {
+    public ClientConnection connect(String host, int port) {
         Preconditions.checkNotNull(host, "Host");
         return connect(new InetSocketAddress(host, port));
     }
