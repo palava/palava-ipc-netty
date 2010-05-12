@@ -68,9 +68,13 @@ final class Netty implements NettyMBean,
     
     private final MBeanService mBeanService;
     
+    private final ExecutorService boss;
+    
+    private final ExecutorService worker;
+    
     private int workerCount = Runtime.getRuntime().availableProcessors() * 2;
     
-    private final ChannelFactory factory;
+    private ChannelFactory factory;
     
     private final ChannelPipelineFactory pipelineFactory;
     
@@ -95,10 +99,8 @@ final class Netty implements NettyMBean,
         
         this.registry = Preconditions.checkNotNull(registry, "Registry");
         this.mBeanService = Preconditions.checkNotNull(mBeanService, "MBeanService");
-        Preconditions.checkNotNull(boss, "Boss");
-        Preconditions.checkNotNull(worker, "Worker");
-        LOG.trace("Using worker count {}", workerCount);
-        this.factory = new NioServerSocketChannelFactory(boss, worker, workerCount);
+        this.boss = Preconditions.checkNotNull(boss, "Boss");
+        this.worker = Preconditions.checkNotNull(worker, "Worker");
         this.pipelineFactory = Preconditions.checkNotNull(pipelineFactory, "PipelineFactory");
         this.address = Preconditions.checkNotNull(address, "Address");
     }
@@ -137,6 +139,10 @@ final class Netty implements NettyMBean,
     public void initialize() throws LifecycleException {
         registry.register(PostFrameworkStart.class, this);
         registry.register(PreFrameworkStop.class, this);
+
+        LOG.trace("Using worker count {}", workerCount);
+        this.factory = new NioServerSocketChannelFactory(boss, worker, workerCount);
+        
         mBeanService.register(this, "name", name);
     }
     
@@ -159,9 +165,9 @@ final class Netty implements NettyMBean,
 
                     @Override
                     public void channelOpen(ChannelHandlerContext context, ChannelStateEvent event) throws Exception {
-                        final Channel currentChannel = context.getChannel();
-                        LOG.info("Adding {} to group", currentChannel);
-                        group.add(currentChannel);
+                        final Channel channel = context.getChannel();
+                        LOG.info("Adding {} to group", channel);
+                        group.add(channel);
                     }
                     
                 });

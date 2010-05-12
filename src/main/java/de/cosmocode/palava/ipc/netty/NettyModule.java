@@ -29,6 +29,7 @@ import com.google.inject.Module;
 import com.google.inject.name.Names;
 
 import de.cosmocode.palava.core.inject.AbstractRebindingModule;
+import de.cosmocode.palava.core.inject.Config;
 import de.cosmocode.palava.core.inject.RebindModule;
 
 /**
@@ -68,8 +69,11 @@ public final class NettyModule implements Module {
 
         private final String name;
         
+        private final Config config;
+        
         public NamedModule(String name) {
             this.name = name;
+            this.config = new Config(name);
         }
 
         @Override
@@ -77,28 +81,28 @@ public final class NettyModule implements Module {
             bind(String.class).annotatedWith(Names.named(NettyConfig.NAME)).toInstance(name);
 
             bind(ChannelPipelineFactory.class).to(
-                Key.get(ChannelPipelineFactory.class, Names.named(name + NettyConfig.PIPELINE_FACTORY)));
+                Key.get(ChannelPipelineFactory.class, Names.named(config.prefixed(NettyConfig.PIPELINE_FACTORY))));
             
             bind(InetSocketAddress.class).annotatedWith(Names.named(NettyConfig.ADDRESS)).to(
-                Key.get(InetSocketAddress.class, Names.named(name + NettyConfig.ADDRESS)));
+                Key.get(InetSocketAddress.class, Names.named(config.prefixed(NettyConfig.ADDRESS))));
         }
         
         @Override
         protected void optionals() {
             bind(int.class).annotatedWith(Names.named(NettyConfig.WORKER_COUNT)).to(
-                Key.get(int.class, Names.named(name + NettyConfig.WORKER_COUNT)));
+                Key.get(int.class, Names.named(config.prefixed(NettyConfig.WORKER_COUNT))));
             
             bind(String.class).annotatedWith(Names.named(NettyConfig.GROUP_NAME)).to(
-                Key.get(String.class, Names.named(name + NettyConfig.GROUP_NAME)));
+                Key.get(String.class, Names.named(config.prefixed(NettyConfig.GROUP_NAME))));
             
             bind(Properties.class).annotatedWith(Names.named(NettyConfig.OPTIONS)).to(
-                Key.get(Properties.class, Names.named(name + NettyConfig.OPTIONS)));
+                Key.get(Properties.class, Names.named(config.prefixed(NettyConfig.OPTIONS))));
             
             bind(long.class).annotatedWith(Names.named(NettyConfig.SHUTDOWN_TIMEOUT)).to(
-                Key.get(long.class, Names.named(name + NettyConfig.SHUTDOWN_TIMEOUT)));
+                Key.get(long.class, Names.named(config.prefixed(NettyConfig.SHUTDOWN_TIMEOUT))));
             
             bind(TimeUnit.class).annotatedWith(Names.named(NettyConfig.SHUTDOWN_TIMEOUT_UNIT)).to(
-                Key.get(TimeUnit.class, Names.named(name + NettyConfig.SHUTDOWN_TIMEOUT_UNIT)));
+                Key.get(TimeUnit.class, Names.named(config.prefixed(NettyConfig.SHUTDOWN_TIMEOUT_UNIT))));
         }
         
         @Override
