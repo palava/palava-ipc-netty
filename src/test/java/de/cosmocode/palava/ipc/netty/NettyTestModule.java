@@ -46,7 +46,7 @@ public final class NettyTestModule implements Module {
         binder.install(new FakeMBeanServerModule());
         binder.install(new ExecutorModule(Boss.class, Boss.NAME));
         binder.install(new ExecutorModule(Worker.class, Worker.NAME));
-        binder.install(new NettyModule());
+        binder.install(new NettyServiceModule());
         binder.bind(ChannelPipelineFactory.class).to(NettyTestChannelPipelineFactory.class).in(Singleton.class);
     }
 
