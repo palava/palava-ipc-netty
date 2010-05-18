@@ -33,16 +33,16 @@ import de.cosmocode.palava.core.inject.Config;
 import de.cosmocode.palava.core.inject.RebindModule;
 
 /**
- * Binds {@link Netty}.
+ * Binds {@link NettyService}.
  *
  * @since 1.0
  * @author Willi Schoenborn
  */
-public final class NettyModule implements Module {
+public final class NettyServiceModule implements Module {
 
     @Override
     public void configure(Binder binder) {
-        binder.bind(Netty.class).asEagerSingleton();
+        binder.bind(NettyService.class).asEagerSingleton();
     }
     
     /**
@@ -78,36 +78,34 @@ public final class NettyModule implements Module {
 
         @Override
         protected void configuration() {
-            bind(String.class).annotatedWith(Names.named(NettyConfig.NAME)).toInstance(name);
+            bind(String.class).annotatedWith(Names.named(NettyServiceConfig.NAME)).toInstance(name);
 
             bind(ChannelPipelineFactory.class).to(
-                Key.get(ChannelPipelineFactory.class, Names.named(config.prefixed(NettyConfig.PIPELINE_FACTORY))));
+                Key.get(ChannelPipelineFactory.class, 
+                    Names.named(config.prefixed(NettyServiceConfig.PIPELINE_FACTORY))));
             
-            bind(InetSocketAddress.class).annotatedWith(Names.named(NettyConfig.ADDRESS)).to(
-                Key.get(InetSocketAddress.class, Names.named(config.prefixed(NettyConfig.ADDRESS))));
+            bind(InetSocketAddress.class).annotatedWith(Names.named(NettyServiceConfig.ADDRESS)).to(
+                Key.get(InetSocketAddress.class, Names.named(config.prefixed(NettyServiceConfig.ADDRESS))));
         }
         
         @Override
         protected void optionals() {
-            bind(int.class).annotatedWith(Names.named(NettyConfig.WORKER_COUNT)).to(
-                Key.get(int.class, Names.named(config.prefixed(NettyConfig.WORKER_COUNT))));
+            bind(int.class).annotatedWith(Names.named(NettyServiceConfig.WORKER_COUNT)).to(
+                Key.get(int.class, Names.named(config.prefixed(NettyServiceConfig.WORKER_COUNT))));
             
-            bind(String.class).annotatedWith(Names.named(NettyConfig.GROUP_NAME)).to(
-                Key.get(String.class, Names.named(config.prefixed(NettyConfig.GROUP_NAME))));
+            bind(Properties.class).annotatedWith(Names.named(NettyServiceConfig.OPTIONS)).to(
+                Key.get(Properties.class, Names.named(config.prefixed(NettyServiceConfig.OPTIONS))));
             
-            bind(Properties.class).annotatedWith(Names.named(NettyConfig.OPTIONS)).to(
-                Key.get(Properties.class, Names.named(config.prefixed(NettyConfig.OPTIONS))));
+            bind(long.class).annotatedWith(Names.named(NettyServiceConfig.SHUTDOWN_TIMEOUT)).to(
+                Key.get(long.class, Names.named(config.prefixed(NettyServiceConfig.SHUTDOWN_TIMEOUT))));
             
-            bind(long.class).annotatedWith(Names.named(NettyConfig.SHUTDOWN_TIMEOUT)).to(
-                Key.get(long.class, Names.named(config.prefixed(NettyConfig.SHUTDOWN_TIMEOUT))));
-            
-            bind(TimeUnit.class).annotatedWith(Names.named(NettyConfig.SHUTDOWN_TIMEOUT_UNIT)).to(
-                Key.get(TimeUnit.class, Names.named(config.prefixed(NettyConfig.SHUTDOWN_TIMEOUT_UNIT))));
+            bind(TimeUnit.class).annotatedWith(Names.named(NettyServiceConfig.SHUTDOWN_TIMEOUT_UNIT)).to(
+                Key.get(TimeUnit.class, Names.named(config.prefixed(NettyServiceConfig.SHUTDOWN_TIMEOUT_UNIT))));
         }
         
         @Override
         protected void bindings() {
-            install(new NettyModule());
+            install(new NettyServiceModule());
         }
         
         @Override

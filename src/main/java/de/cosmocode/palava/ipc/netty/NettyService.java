@@ -57,10 +57,10 @@ import de.cosmocode.palava.jmx.MBeanService;
  * @since 1.0
  * @author Willi Schoenborn
  */
-final class Netty implements NettyMBean, 
+final class NettyService implements NettyServiceMBean, 
     Initializable, PostFrameworkStart, PreFrameworkStop, Disposable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Netty.class);
+    private static final Logger LOG = LoggerFactory.getLogger(NettyService.class);
     
     private String name = "netty";
     
@@ -78,7 +78,7 @@ final class Netty implements NettyMBean,
     
     private final ChannelPipelineFactory pipelineFactory;
     
-    private ChannelGroup group = new DefaultChannelGroup();
+    private final ChannelGroup group = new DefaultChannelGroup();
     
     private final InetSocketAddress address;
     
@@ -89,13 +89,13 @@ final class Netty implements NettyMBean,
     private TimeUnit shutdownTimeoutUnit = TimeUnit.SECONDS;
     
     @Inject
-    public Netty(
+    public NettyService(
         Registry registry,
         MBeanService mBeanService,
         @Boss ExecutorService boss,
         @Worker ExecutorService worker,
         ChannelPipelineFactory pipelineFactory,
-        @Named(NettyConfig.ADDRESS) InetSocketAddress address) {
+        @Named(NettyServiceConfig.ADDRESS) InetSocketAddress address) {
         
         this.registry = Preconditions.checkNotNull(registry, "Registry");
         this.mBeanService = Preconditions.checkNotNull(mBeanService, "MBeanService");
@@ -106,32 +106,27 @@ final class Netty implements NettyMBean,
     }
     
     @Inject(optional = true)
-    void setName(@Named(NettyConfig.NAME) String name) {
+    void setName(@Named(NettyServiceConfig.NAME) String name) {
         this.name = Preconditions.checkNotNull(name, "Name");
     }
     
     @Inject(optional = true)
-    void setWorkerCount(@Named(NettyConfig.WORKER_COUNT) int workerCount) {
+    void setWorkerCount(@Named(NettyServiceConfig.WORKER_COUNT) int workerCount) {
         this.workerCount = workerCount;
     }
     
     @Inject(optional = true)
-    void setGroupName(@Named(NettyConfig.GROUP_NAME) String groupName) {
-        this.group = new DefaultChannelGroup(Preconditions.checkNotNull(groupName, "GroupName"));
-    }
-    
-    @Inject(optional = true)
-    void setOptions(@Named(NettyConfig.OPTIONS) Properties options) {
+    void setOptions(@Named(NettyServiceConfig.OPTIONS) Properties options) {
         this.options = Preconditions.checkNotNull(options, "Options");
     }
     
     @Inject(optional = true)
-    void setShutdownTimeout(@Named(NettyConfig.SHUTDOWN_TIMEOUT) long shutdownTimeout) {
+    void setShutdownTimeout(@Named(NettyServiceConfig.SHUTDOWN_TIMEOUT) long shutdownTimeout) {
         this.shutdownTimeout = shutdownTimeout;
     }
     
     @Inject(optional = true)
-    void setShutdownTimeoutUnit(@Named(NettyConfig.SHUTDOWN_TIMEOUT_UNIT) TimeUnit shutdownTimeoutUnit) {
+    void setShutdownTimeoutUnit(@Named(NettyServiceConfig.SHUTDOWN_TIMEOUT_UNIT) TimeUnit shutdownTimeoutUnit) {
         this.shutdownTimeoutUnit = Preconditions.checkNotNull(shutdownTimeoutUnit, "ShutdownTimeoutUnit");
     }
     
@@ -207,7 +202,7 @@ final class Netty implements NettyMBean,
     
     @Override
     public String toString() {
-        return String.format("%s [%s]", Netty.class.getSimpleName(), name);
+        return String.format("%s [%s]", NettyService.class.getSimpleName(), name);
     }
 
 }

@@ -48,7 +48,7 @@ public final class ChannelBuffering {
         return new InputStream() {
             
             @Override
-            public synchronized int read() throws IOException {
+            public int read() throws IOException {
                 if (buffer.readable()) {
                     return buffer.readByte();
                 } else {
@@ -57,7 +57,7 @@ public final class ChannelBuffering {
             }
             
             @Override
-            public synchronized int read(byte[] b, int off, int len) throws IOException {
+            public int read(byte[] b, int off, int len) throws IOException {
                 if (buffer.readable()) {
                     final int length = Math.min(len, buffer.readableBytes());
                     buffer.readBytes(b, off, length);
@@ -87,12 +87,12 @@ public final class ChannelBuffering {
         return new OutputStream() {
             
             @Override
-            public synchronized void write(int b) throws IOException {
+            public void write(int b) throws IOException {
                 buffer.writeByte(b);
             }
             
             @Override
-            public synchronized void write(byte[] b, int off, int len) throws IOException {
+            public void write(byte[] b, int off, int len) throws IOException {
                 buffer.writeBytes(b, off, len);
             }
             

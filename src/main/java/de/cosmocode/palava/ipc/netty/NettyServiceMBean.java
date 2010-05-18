@@ -17,12 +17,12 @@
 package de.cosmocode.palava.ipc.netty;
 
 /**
- * MBean interface for {@link Netty}.
+ * MBean interface for {@link NettyService}.
  *
  * @since 1.0
  * @author Willi Schoenborn
  */
-public interface NettyMBean {
+public interface NettyServiceMBean {
 
     /**
      * Retrieves the number of open connections.
