@@ -26,6 +26,7 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Module;
+import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 
 import de.cosmocode.palava.core.inject.AbstractRebindingModule;
@@ -43,6 +44,8 @@ public final class NettyServiceModule implements Module {
     @Override
     public void configure(Binder binder) {
         binder.bind(NettyService.class).asEagerSingleton();
+        binder.bind(ConnectionChannelHandler.class).in(Singleton.class);
+        binder.bind(ConnectionManager.class).to(ConnectionChannelHandler.class).in(Singleton.class);
     }
     
     /**
