@@ -23,8 +23,6 @@ import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
@@ -43,9 +41,7 @@ import de.cosmocode.palava.ipc.protocol.DetachedConnection;
  * @since 1.0
  * @author Willi Schoenborn
  */
-final class ConnectionChannelHandler extends SimpleChannelHandler implements ConnectionManager {
-    
-    private static final Logger LOG = LoggerFactory.getLogger(ConnectionChannelHandler.class);
+final class DefaultConnectionManager extends SimpleChannelHandler implements ConnectionManager {
     
     private final ConcurrentMap<Channel, DetachedConnection> connections = new MapMaker().makeMap();
     
@@ -54,7 +50,7 @@ final class ConnectionChannelHandler extends SimpleChannelHandler implements Con
     private final IpcConnectionDestroyEvent destroyEvent;
     
     @Inject
-    public ConnectionChannelHandler(
+    public DefaultConnectionManager(
         @Proxy IpcConnectionCreateEvent createEvent,
         @SilentProxy IpcConnectionDestroyEvent destroyEvent) {
         this.createEvent = Preconditions.checkNotNull(createEvent, "CreateEvent");
@@ -64,28 +60,22 @@ final class ConnectionChannelHandler extends SimpleChannelHandler implements Con
     @Override
     public void channelConnected(ChannelHandlerContext context, ChannelStateEvent event) throws Exception {
         final Channel channel = event.getChannel();
-        LOG.trace("Channel {} connected", channel);
         final DetachedConnection connection = new ChannelConnection(channel);
         connections.put(channel, connection);
         createEvent.eventIpcConnectionCreate(connection);
-        context.sendUpstream(event);
     }
     
     @Override
     public DetachedConnection get(Channel channel) {
-        Preconditions.checkNotNull(channel, "Channel");
         return connections.get(channel);
     }
     
     @Override
     public void channelClosed(ChannelHandlerContext context, ChannelStateEvent event) throws Exception {
         final Channel channel = event.getChannel();
-        LOG.trace("Channel {} closed", channel);
         final DetachedConnection connection = connections.remove(channel);
-        Preconditions.checkState(connection != null, "No connection was set for %s", channel);
         destroyEvent.eventIpcConnectionDestroy(connection);
         connection.clear();
-        context.sendUpstream(event);
     }
     
 }

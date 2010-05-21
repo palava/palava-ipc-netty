@@ -16,30 +16,25 @@
 
 package de.cosmocode.palava.ipc.netty;
 
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.Channels;
+import org.jboss.netty.channel.ServerChannelFactory;
+import org.jboss.netty.channel.socket.ServerSocketChannelFactory;
 
-import com.google.inject.Inject;
+import com.google.inject.Binder;
+import com.google.inject.Module;
+import com.google.inject.Singleton;
 
 /**
- * Test implementation of the {@link ChannelPipelineFactory} interface.
+ * Binds {@link ServerSocketChannelFactory} to {@link ConfigurableNioServerSocketChannelFactory}.
  *
  * @since 1.0
  * @author Willi Schoenborn
  */
-public final class NettyTestChannelPipelineFactory implements ChannelPipelineFactory {
+public final class NioServerSocketChannelFactoryModule implements Module {
 
-    private final EchoHandler handler;
-    
-    @Inject
-    public NettyTestChannelPipelineFactory(EchoHandler handler) {
-        this.handler = handler;
-    }
-    
     @Override
-    public ChannelPipeline getPipeline() throws Exception {
-        return Channels.pipeline(handler);
+    public void configure(Binder binder) {
+        binder.bind(ServerChannelFactory.class).to(
+            ConfigurableNioServerSocketChannelFactory.class).in(Singleton.class);
     }
 
 }

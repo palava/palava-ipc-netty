@@ -21,6 +21,7 @@ import org.jboss.netty.channel.Channels;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
+import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 
 import de.cosmocode.palava.concurrent.DefaultThreadProviderModule;
@@ -36,7 +37,7 @@ import de.cosmocode.palava.jmx.FakeMBeanServerModule;
  * @since 1.0
  * @author Willi Schoenborn
  */
-public final class NettyTestModule implements Module {
+public final class NettyTestModule2 implements Module {
 
     @Override
     public void configure(Binder binder) {
@@ -46,13 +47,35 @@ public final class NettyTestModule implements Module {
         binder.install(new DefaultThreadProviderModule());
         binder.install(new FakeMBeanServerModule());
         
-        binder.install(new ExecutorModule(Boss.class, Boss.NAME));
-        binder.install(new ExecutorModule(Worker.class, Worker.NAME));
-        binder.install(new NioServerSocketChannelFactoryModule());
+        binder.install(new PrivateModule() {
+            
+            @Override
+            protected void configure() {
+                install(new ExecutorModule(Boss.class, "json-boss"));
+                install(new ExecutorModule(Worker.class, "json-worker"));
+                install(new NioServerSocketChannelFactoryModule());
+                
+                install(new ChannelPipelineFactoryModule());
+                
+                install(NettyServiceModule.named("json").overrideOptionals());
+            }
+            
+        });
         
-        binder.install(new ChannelPipelineFactoryModule());
-        
-        binder.install(new NettyServiceModule());
+        binder.install(new PrivateModule() {
+            
+            @Override
+            protected void configure() {
+                install(new ExecutorModule(Boss.class, "xml-boss"));
+                install(new ExecutorModule(Worker.class, "xml-worker"));
+                install(new NioServerSocketChannelFactoryModule());
+                
+                install(new ChannelPipelineFactoryModule());
+                
+                install(NettyServiceModule.named("xml"));
+            }
+
+        });
     }
 
     /**

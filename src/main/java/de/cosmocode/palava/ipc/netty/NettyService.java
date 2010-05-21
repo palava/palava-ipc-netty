@@ -20,20 +20,18 @@ import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.ChannelStateEvent;
+import org.jboss.netty.channel.ServerChannelFactory;
 import org.jboss.netty.channel.SimpleChannelHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,19 +62,13 @@ final class NettyService implements NettyServiceMBean,
     
     private String name = "netty";
     
+    private final ServerChannelFactory channelFactory;
+    
+    private final ChannelPipelineFactory pipelineFactory;
+    
     private final Registry registry;
     
     private final MBeanService mBeanService;
-    
-    private final ExecutorService boss;
-    
-    private final ExecutorService worker;
-    
-    private int workerCount = Runtime.getRuntime().availableProcessors() * 2;
-    
-    private ChannelFactory factory;
-    
-    private final ChannelPipelineFactory pipelineFactory;
     
     private final ChannelGroup group = new DefaultChannelGroup();
     
@@ -90,29 +82,22 @@ final class NettyService implements NettyServiceMBean,
     
     @Inject
     public NettyService(
+        ServerChannelFactory factory,
         Registry registry,
         MBeanService mBeanService,
-        @Boss ExecutorService boss,
-        @Worker ExecutorService worker,
         ChannelPipelineFactory pipelineFactory,
         @Named(NettyServiceConfig.ADDRESS) InetSocketAddress address) {
         
+        this.channelFactory = Preconditions.checkNotNull(factory, "ChannelFactory");
+        this.pipelineFactory = Preconditions.checkNotNull(pipelineFactory, "PipelineFactory");
         this.registry = Preconditions.checkNotNull(registry, "Registry");
         this.mBeanService = Preconditions.checkNotNull(mBeanService, "MBeanService");
-        this.boss = Preconditions.checkNotNull(boss, "Boss");
-        this.worker = Preconditions.checkNotNull(worker, "Worker");
-        this.pipelineFactory = Preconditions.checkNotNull(pipelineFactory, "PipelineFactory");
         this.address = Preconditions.checkNotNull(address, "Address");
     }
     
     @Inject(optional = true)
     void setName(@Named(NettyServiceConfig.NAME) String name) {
         this.name = Preconditions.checkNotNull(name, "Name");
-    }
-    
-    @Inject(optional = true)
-    void setWorkerCount(@Named(NettyServiceConfig.WORKER_COUNT) int workerCount) {
-        this.workerCount = workerCount;
     }
     
     @Inject(optional = true)
@@ -134,16 +119,12 @@ final class NettyService implements NettyServiceMBean,
     public void initialize() throws LifecycleException {
         registry.register(PostFrameworkStart.class, this);
         registry.register(PreFrameworkStop.class, this);
-
-        LOG.trace("Using worker count {}", workerCount);
-        this.factory = new NioServerSocketChannelFactory(boss, worker, workerCount);
-        
         mBeanService.register(this, "name", name);
     }
     
     @Override
     public void eventPostFrameworkStart() {
-        final ServerBootstrap bootstrap = new ServerBootstrap(factory);
+        final ServerBootstrap bootstrap = new ServerBootstrap(channelFactory);
         
         for (Entry<Object, Object> entry : options.entrySet()) {
             LOG.trace("Setting option {}", entry);
@@ -175,13 +156,14 @@ final class NettyService implements NettyServiceMBean,
         LOG.trace("Binding {} to {}", bootstrap, address);
         final Channel channel = bootstrap.bind(address);
 
-        LOG.info("Adding {} to group", channel);
+        LOG.info("Adding server socket {} to group", channel);
         group.add(channel);
     }
     
     @Override
     public int getOpenConnections() {
-        return group.size();
+        // server socket is no connection
+        return group.size() - 1;
     }
     
     @Override
@@ -195,7 +177,7 @@ final class NettyService implements NettyServiceMBean,
         try {
             mBeanService.unregister(this, "name", name);
         } finally {
-            factory.releaseExternalResources();
+            channelFactory.releaseExternalResources();
             registry.remove(this);
         }
     }

@@ -20,13 +20,10 @@ import java.net.InetSocketAddress;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import org.jboss.netty.channel.ChannelPipelineFactory;
-
 import com.google.common.base.Preconditions;
 import com.google.inject.Binder;
 import com.google.inject.Key;
 import com.google.inject.Module;
-import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 
 import de.cosmocode.palava.core.inject.AbstractRebindingModule;
@@ -35,7 +32,7 @@ import de.cosmocode.palava.core.inject.RebindModule;
 
 /**
  * Binds {@link NettyService}.
- *
+ * 
  * @since 1.0
  * @author Willi Schoenborn
  */
@@ -44,8 +41,6 @@ public final class NettyServiceModule implements Module {
     @Override
     public void configure(Binder binder) {
         binder.bind(NettyService.class).asEagerSingleton();
-        binder.bind(ConnectionChannelHandler.class).in(Singleton.class);
-        binder.bind(ConnectionManager.class).to(ConnectionChannelHandler.class).in(Singleton.class);
     }
     
     /**
@@ -83,10 +78,6 @@ public final class NettyServiceModule implements Module {
         protected void configuration() {
             bind(String.class).annotatedWith(Names.named(NettyServiceConfig.NAME)).toInstance(name);
 
-            bind(ChannelPipelineFactory.class).to(
-                Key.get(ChannelPipelineFactory.class, 
-                    Names.named(config.prefixed(NettyServiceConfig.PIPELINE_FACTORY))));
-            
             bind(InetSocketAddress.class).annotatedWith(Names.named(NettyServiceConfig.ADDRESS)).to(
                 Key.get(InetSocketAddress.class, Names.named(config.prefixed(NettyServiceConfig.ADDRESS))));
         }
