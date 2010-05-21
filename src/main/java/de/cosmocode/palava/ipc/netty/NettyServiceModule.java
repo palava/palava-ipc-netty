@@ -16,7 +16,7 @@
 
 package de.cosmocode.palava.ipc.netty;
 
-import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -78,8 +78,8 @@ public final class NettyServiceModule implements Module {
         protected void configuration() {
             bind(String.class).annotatedWith(Names.named(NettyServiceConfig.NAME)).toInstance(name);
 
-            bind(InetSocketAddress.class).annotatedWith(Names.named(NettyServiceConfig.ADDRESS)).to(
-                Key.get(InetSocketAddress.class, Names.named(config.prefixed(NettyServiceConfig.ADDRESS))));
+            bind(SocketAddress.class).annotatedWith(Names.named(NettyServiceConfig.ADDRESS)).to(
+                Key.get(SocketAddress.class, Names.named(config.prefixed(NettyServiceConfig.ADDRESS))));
         }
         
         @Override

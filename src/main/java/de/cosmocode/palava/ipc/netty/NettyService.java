@@ -16,20 +16,24 @@
 
 package de.cosmocode.palava.ipc.netty;
 
-import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.concurrent.ThreadSafe;
+
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelHandler;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ServerChannelFactory;
 import org.jboss.netty.channel.SimpleChannelHandler;
+import org.jboss.netty.channel.ChannelHandler.Sharable;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.slf4j.Logger;
@@ -72,7 +76,7 @@ final class NettyService implements NettyServiceMBean,
     
     private final ChannelGroup group = new DefaultChannelGroup();
     
-    private final InetSocketAddress address;
+    private final SocketAddress address;
     
     private Map<Object, Object> options = Maps.newHashMap();
     
@@ -86,7 +90,7 @@ final class NettyService implements NettyServiceMBean,
         Registry registry,
         MBeanService mBeanService,
         ChannelPipelineFactory pipelineFactory,
-        @Named(NettyServiceConfig.ADDRESS) InetSocketAddress address) {
+        @Named(NettyServiceConfig.ADDRESS) SocketAddress address) {
         
         this.channelFactory = Preconditions.checkNotNull(factory, "ChannelFactory");
         this.pipelineFactory = Preconditions.checkNotNull(pipelineFactory, "PipelineFactory");
@@ -127,31 +131,11 @@ final class NettyService implements NettyServiceMBean,
         final ServerBootstrap bootstrap = new ServerBootstrap(channelFactory);
         
         for (Entry<Object, Object> entry : options.entrySet()) {
-            LOG.trace("Setting option {}", entry);
+            LOG.info("Setting option {} = {}", entry.getKey(), entry.getValue());
             bootstrap.setOption(entry.getKey().toString(), entry.getValue());
         }
         
-        bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
-            
-            @Override
-            public ChannelPipeline getPipeline() throws Exception {
-                final ChannelPipeline pipeline = pipelineFactory.getPipeline();
-                
-                pipeline.addFirst("channel-add-handler", new SimpleChannelHandler() {
-
-                    @Override
-                    public void channelOpen(ChannelHandlerContext context, ChannelStateEvent event) throws Exception {
-                        final Channel channel = context.getChannel();
-                        LOG.info("Adding {} to group", channel);
-                        group.add(channel);
-                    }
-                    
-                });
-                
-                return pipeline;
-            }
-            
-        });
+        bootstrap.setPipelineFactory(new PipelineFactory());
         
         LOG.trace("Binding {} to {}", bootstrap, address);
         final Channel channel = bootstrap.bind(address);
@@ -160,9 +144,50 @@ final class NettyService implements NettyServiceMBean,
         group.add(channel);
     }
     
+    /**
+     * Internal {@link ChannelPipelineFactory} implementation which adds
+     * an instance of {@link Handler} as first {@link ChannelHandler} to each new
+     * {@link ChannelPipeline}.
+     *
+     * @since 1.0
+     * @author Willi Schoenborn
+     */
+    private final class PipelineFactory implements ChannelPipelineFactory {
+        
+        private final ChannelHandler handler = new Handler();
+        
+        @Override
+        public ChannelPipeline getPipeline() throws Exception {
+            final ChannelPipeline pipeline = pipelineFactory.getPipeline();
+            pipeline.addLast("channel-add-handler", handler);
+            return pipeline;
+        }
+        
+    }
+    
+    /**
+     * Internal {@link ChannelHandler} implementation which adds each new {@link Channel}
+     * to {@link NettyService#group}.
+     *
+     * @since 1.0
+     * @author Willi Schoenborn
+     */
+    @Sharable
+    @ThreadSafe
+    private final class Handler extends SimpleChannelHandler {
+        
+        @Override
+        public void channelOpen(ChannelHandlerContext context, ChannelStateEvent event) throws Exception {
+            final Channel channel = context.getChannel();
+            LOG.info("Adding {} to group", channel);
+            group.add(channel);
+        }
+        
+    }
+    
     @Override
     public int getOpenConnections() {
-        // server socket is no connection
+        // server socket is not considered a connection
         return group.size() - 1;
     }
     

@@ -16,13 +16,18 @@
 
 package de.cosmocode.palava.ipc.netty;
 
+import java.net.SocketAddress;
+import java.util.UUID;
+
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.Channels;
+import org.jboss.netty.channel.local.LocalAddress;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
+import com.google.inject.name.Names;
 
 import de.cosmocode.palava.concurrent.DefaultThreadProviderModule;
 import de.cosmocode.palava.concurrent.ExecutorModule;
@@ -53,10 +58,10 @@ public final class NettyTestModule2 implements Module {
             protected void configure() {
                 install(new ExecutorModule(Boss.class, "json-boss"));
                 install(new ExecutorModule(Worker.class, "json-worker"));
-                install(new NioServerSocketChannelFactoryModule());
-                
+                bind(SocketAddress.class).annotatedWith(Names.named("json." + NettyServiceConfig.ADDRESS)).toInstance(
+                    new LocalAddress(UUID.randomUUID().toString()));
+                install(new LocalServerChannelFactoryModule());
                 install(new ChannelPipelineFactoryModule());
-                
                 install(NettyServiceModule.named("json").overrideOptionals());
             }
             
@@ -69,9 +74,7 @@ public final class NettyTestModule2 implements Module {
                 install(new ExecutorModule(Boss.class, "xml-boss"));
                 install(new ExecutorModule(Worker.class, "xml-worker"));
                 install(new NioServerSocketChannelFactoryModule());
-                
                 install(new ChannelPipelineFactoryModule());
-                
                 install(NettyServiceModule.named("xml"));
             }
 
