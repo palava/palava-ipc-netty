@@ -69,7 +69,7 @@ public final class ChannelBuffering {
             
             @Override
             public String toString() {
-                return String.format("ChannelBuffers.asInputStream(%s)", buffer);
+                return String.format("ChannelBuffering.asInputStream(%s)", buffer);
             }
             
         };
@@ -98,7 +98,7 @@ public final class ChannelBuffering {
             
             @Override
             public String toString() {
-                return String.format("ChannelBuffers.asOutputStream(%s)", buffer);
+                return String.format("ChannelBuffering.asOutputStream(%s)", buffer);
             }
             
         };
