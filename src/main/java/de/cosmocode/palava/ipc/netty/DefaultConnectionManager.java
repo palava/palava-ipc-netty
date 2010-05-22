@@ -67,7 +67,9 @@ final class DefaultConnectionManager extends SimpleChannelHandler implements Con
     
     @Override
     public DetachedConnection get(Channel channel) {
-        return connections.get(channel);
+        final DetachedConnection connection = connections.get(channel);
+        Preconditions.checkState(connection != null, "No connection set for channel %s", channel);
+        return connection;
     }
     
     @Override

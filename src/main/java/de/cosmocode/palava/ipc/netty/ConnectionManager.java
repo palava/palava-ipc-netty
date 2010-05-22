@@ -37,6 +37,7 @@ public interface ConnectionManager extends ChannelHandler {
      * @param channel the current channel
      * @return the connection associated with the specified channel
      * @throws NullPointerException if channel is null
+     * @throws IllegalStateException if no connection is present for the given channel
      */
     DetachedConnection get(Channel channel);
     
