@@ -26,7 +26,7 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.name.Names;
 
-import de.cosmocode.palava.core.inject.AbstractRebindingModule;
+import de.cosmocode.palava.core.inject.AbstractRebindModule;
 import de.cosmocode.palava.core.inject.Config;
 import de.cosmocode.palava.core.inject.RebindModule;
 
@@ -63,7 +63,7 @@ public final class NettyServiceModule implements Module {
      * @since 1.0
      * @author Willi Schoenborn
      */
-    private static final class NamedModule extends AbstractRebindingModule {
+    private static final class NamedModule extends AbstractRebindModule {
 
         private final String name;
         
