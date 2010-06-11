@@ -16,11 +16,12 @@
 
 package de.cosmocode.palava.ipc.netty;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBufferInputStream;
+import org.jboss.netty.buffer.ChannelBufferOutputStream;
 
 import com.google.common.base.Preconditions;
 
@@ -45,34 +46,7 @@ public final class ChannelBuffering {
      */
     public static InputStream asInputStream(final ChannelBuffer buffer) {
         Preconditions.checkNotNull(buffer, "Buffer");
-        return new InputStream() {
-            
-            @Override
-            public int read() throws IOException {
-                if (buffer.readable()) {
-                    return buffer.readByte();
-                } else {
-                    return -1;
-                }
-            }
-            
-            @Override
-            public int read(byte[] b, int off, int len) throws IOException {
-                if (buffer.readable()) {
-                    final int length = Math.min(len, buffer.readableBytes());
-                    buffer.readBytes(b, off, length);
-                    return length;
-                } else {
-                    return -1;
-                }
-            }
-            
-            @Override
-            public String toString() {
-                return String.format("ChannelBuffering.asInputStream(%s)", buffer);
-            }
-            
-        };
+        return new ChannelBufferInputStream(buffer);
     }
 
     /**
@@ -84,24 +58,7 @@ public final class ChannelBuffering {
      */
     public static OutputStream asOutputStream(final ChannelBuffer buffer) {
         Preconditions.checkNotNull(buffer, "Buffer");
-        return new OutputStream() {
-            
-            @Override
-            public void write(int b) throws IOException {
-                buffer.writeByte(b);
-            }
-            
-            @Override
-            public void write(byte[] b, int off, int len) throws IOException {
-                buffer.writeBytes(b, off, len);
-            }
-            
-            @Override
-            public String toString() {
-                return String.format("ChannelBuffering.asOutputStream(%s)", buffer);
-            }
-            
-        };
+        return new ChannelBufferOutputStream(buffer);
     }
     
 }
