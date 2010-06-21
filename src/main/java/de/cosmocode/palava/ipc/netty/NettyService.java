@@ -179,7 +179,7 @@ final class NettyService implements NettyServiceMBean,
         @Override
         public void channelOpen(ChannelHandlerContext context, ChannelStateEvent event) throws Exception {
             final Channel channel = context.getChannel();
-            LOG.info("Adding {} to group", channel);
+            LOG.trace("Adding {} to group", channel);
             group.add(channel);
         }
         
