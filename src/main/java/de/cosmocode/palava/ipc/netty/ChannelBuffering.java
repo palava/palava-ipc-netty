@@ -40,10 +40,12 @@ public final class ChannelBuffering {
     /**
      * Adapts a {@link ChannelBuffer} to an {@link InputStream}.
      * 
+     * @deprecated use {@link ChannelBufferInputStream}
      * @param buffer the underlying channel buffer
      * @return an inputstream which reads from the given channel buffer
      * @throws NullPointerException if buffer is null
      */
+    @Deprecated
     public static InputStream asInputStream(final ChannelBuffer buffer) {
         Preconditions.checkNotNull(buffer, "Buffer");
         return new ChannelBufferInputStream(buffer);
@@ -52,10 +54,12 @@ public final class ChannelBuffering {
     /**
      * Adapts a {@link ChannelBuffer} to an {@link OutputStream}.
      * 
+     * @deprecated use {@link ChannelBufferOutputStream}
      * @param buffer the underlying channel buffer
      * @return an outputstream which writes to the given channel buffer
      * @throws NullPointerException if buffer is null
      */
+    @Deprecated
     public static OutputStream asOutputStream(final ChannelBuffer buffer) {
         Preconditions.checkNotNull(buffer, "Buffer");
         return new ChannelBufferOutputStream(buffer);
