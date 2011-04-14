@@ -70,11 +70,5 @@
       <version>[1.2,2)</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>de.cosmocode.palava</groupId>
-      <artifactId>palava-concurrent</artifactId>
-      <version>[2.2,3)</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 </project>
