@@ -69,7 +69,7 @@ public final class ProtocolHandler extends SimpleChannelHandler {
         final DetachedConnection connection = manager.get(channel);
         final Object response = process(protocol, request, connection);
         
-        if (response == Protocol.NO_RESPONSE) {
+        if (response == Protocol.NoResponse.INSTANCE) {
             LOG.trace("Omitting response as requested by {}", protocol);
         } else {
             LOG.trace("Writing response {} to channel", response);
