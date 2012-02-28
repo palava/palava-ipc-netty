@@ -30,6 +30,10 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
       <dependency>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+      </dependency>
+      <dependency>
         <groupId>com.google.inject</groupId>
         <artifactId>guice</artifactId>
         <version>2.0</version>
@@ -56,6 +60,11 @@
       <artifactId>palava-jmx</artifactId>
       <version>[1.2,2)</version>
     </dependency>
+      <dependency>
+        <groupId>de.cosmocode.palava</groupId>
+        <artifactId>palava-ipc</artifactId>
+        <version>[2.0,3)</version>
+      </dependency>
     <dependency>
       <groupId>de.cosmocode.palava</groupId>
       <artifactId>palava-ipc-protocol</artifactId>
