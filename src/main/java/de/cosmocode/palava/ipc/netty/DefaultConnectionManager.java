@@ -50,7 +50,7 @@ final class DefaultConnectionManager extends SimpleChannelHandler implements Con
     private final IpcConnectionDestroyEvent destroyEvent;
     
     @Inject
-    public DefaultConnectionManager(
+    DefaultConnectionManager(
         @Proxy IpcConnectionCreateEvent createEvent,
         @SilentProxy IpcConnectionDestroyEvent destroyEvent) {
         this.createEvent = Preconditions.checkNotNull(createEvent, "CreateEvent");

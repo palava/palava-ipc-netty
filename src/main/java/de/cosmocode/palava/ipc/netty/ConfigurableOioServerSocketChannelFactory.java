@@ -42,10 +42,10 @@ final class ConfigurableOioServerSocketChannelFactory implements ServerChannelFa
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigurableOioServerSocketChannelFactory.class);
 
-    private ServerSocketChannelFactory factory;
+    private final ServerSocketChannelFactory factory;
 
     @Inject
-    public ConfigurableOioServerSocketChannelFactory(
+    ConfigurableOioServerSocketChannelFactory(
         @Boss ExecutorService boss,
         @Worker ExecutorService worker) {
         

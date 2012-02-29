@@ -53,7 +53,7 @@ final class ConfigurableNioServerSocketChannelFactory implements ServerChannelFa
     private ServerSocketChannelFactory factory;
 
     @Inject
-    public ConfigurableNioServerSocketChannelFactory(
+    ConfigurableNioServerSocketChannelFactory(
         @Boss ExecutorService boss,
         @Worker ExecutorService worker) {
         this.boss = Preconditions.checkNotNull(boss, "Boss");

@@ -69,7 +69,7 @@ public final class NettyServiceModule implements Module {
         
         private final Config config;
         
-        public NamedModule(String name) {
+        private NamedModule(String name) {
             this.name = name;
             this.config = new Config(name);
         }

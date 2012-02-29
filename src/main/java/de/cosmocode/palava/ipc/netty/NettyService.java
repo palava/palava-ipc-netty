@@ -85,7 +85,7 @@ final class NettyService implements NettyServiceMBean,
     private TimeUnit shutdownTimeoutUnit = TimeUnit.SECONDS;
     
     @Inject
-    public NettyService(
+    NettyService(
         ServerChannelFactory factory,
         Registry registry,
         MBeanService mBeanService,
